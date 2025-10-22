@@ -1,4 +1,3 @@
-#backend\lifespan.py
 from tortoise import Tortoise
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -6,10 +5,10 @@ from pathlib import Path
 import os
 import logging
 
+# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-#Автоматически вычисляет родительскую директорию и следует из неё в data, так же можно задать искомую директорию через .env файл
 DB_DIR = Path(os.getenv("DB_DATA_DIR", Path(__file__).parents[1] / "data"))
 try:
     os.makedirs(DB_DIR, exist_ok=True)
@@ -17,33 +16,43 @@ try:
 except Exception as e:
     logger.error(f"Ошибка создания директории {DB_DIR}: {e}")
 
+DATABASES = {
+    "users": {
+        "db_name": "users.db",
+        "models_module": "backend.models.users",
+        "connection_name": "users_connection",
+        "app_name": "users_db"
+    }
+}
+
 async def init_db():
-    logger.info("Инициализация db...")
+    logger.info("Initializing databases...")
+
+    connections = {}
+    apps = {}
+
+    for name, config in DATABASES.items():
+        connections[config["connection_name"]] = {
+            "engine": "tortoise.backends.sqlite",
+            "credentials": {
+                "file_path": DB_DIR / config["db_name"],
+                "journal_mode": "WAL",
+                "synchronous": "NORMAL"
+            },
+        }
+
+        apps[config["app_name"]] = {
+            "models": [config["models_module"]],
+            "default_connection": config["connection_name"]
+        }
 
     try:
-        await Tortoise.init(
-            {
-                "connections": {
-                    "users_connection": {
-                        "engine": "tortoise.backends.sqlite",
-                        "credentials": {
-                            "file_path": DB_DIR / "users.db",
-                            "journal_mode": "WAL", #Позволяет работать параллельно с записью и чтением
-                            "synchronous": "NORMAL" #Устанавливает насколько агрессивно записывать изменения из буфера в физический файл БД
-                        },
-                    },
-                },
-                "apps": {
-                    # База данных пользователей
-                    "users_db": {
-                        "models": ["backend.models.users"],
-                        "default_connection": "users_connection"
-                    },
-                },
-            }
-        )
+        await Tortoise.init({
+            "connections": connections,
+            "apps": apps,
+        })
 
-        logger.info("Создание схем баз данных...")
+        logger.info("Generating database schema...")
         await Tortoise.generate_schemas(safe=True)
 
     except Exception as e:
@@ -51,7 +60,7 @@ async def init_db():
         raise
 
 async def close_db(app: FastAPI):
-    logger.info("Закрытие подключения к db...")
+    logger.info("Closing database connections...")
     try:
         await Tortoise.close_connections()
     except Exception as e:
@@ -59,8 +68,8 @@ async def close_db(app: FastAPI):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Startup: Инициализация db")
+    logger.info("Startup: initializing databases")
     await init_db()
     yield
-    logger.info("Shutdown: Закрытие подключения к db")
+    logger.info("Shutdown: closing database connections")
     await close_db(app)

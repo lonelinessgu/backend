@@ -1,38 +1,34 @@
+# routes/user_modules/create_user
 from fastapi import APIRouter, HTTPException, status
 from pydantic import field_validator
 from tortoise.contrib.pydantic import pydantic_model_creator
 from backend.models.users_roles import UserRole
 from backend.auth.add_users import handle_create_user_request
 from backend.models.users import User
-from typing import Any
+from pydantic_core import PydanticCustomError
+import logging
 
-router = APIRouter()
+create_user_router = APIRouter()
+logger = logging.getLogger(__name__)
 
-# Создаем базовую модель с помощью pydantic_model_creator
 BaseCreateUserRequest = pydantic_model_creator(
     User,
     name="BaseCreateUserRequest",
-    exclude=("id", "status", "hashed_password") #Убираю данные поля из-за ненадобности
+    exclude=("id", "status", "hashed_password")
 )
 
-
-# Создаем кастомную модель с валидацией, наследующую базовые поля
 class CreateUserRequest(BaseCreateUserRequest):
     password: str
 
     @field_validator('role')
-    @classmethod
-    def validate_role(cls, v: Any) -> str:
-        """Валидатор для проверки допустимых значений роли"""
+    def validate_role(cls, v: str) -> str:
         try:
-            # Проверяем, что роль существует в перечислении
             role_enum = UserRole(v)
-            return role_enum.value  # Возвращаем строковое значение
+            return role_enum.value
         except ValueError:
-            raise ValueError(f"Недопустимая роль")
+            raise PydanticCustomError("value_error", "Недопустимая роль")
 
-
-@router.post("/create_user",
+@create_user_router.post("/create_user",
     response_model=dict,
     responses={
         200: {"description": "Успешное создание пользователя"},
@@ -65,10 +61,14 @@ POST
 )
 async def create_user(user_data: CreateUserRequest):
     try:
-        return await handle_create_user_request(user_data.model_dump())
-    except HTTPException:
-        raise  # Пробрасываем HTTPException как есть (middleware его перехватит)
-    except Exception:
+        result = await handle_create_user_request(user_data.model_dump())
+        logger.info(f"User created successfully: {user_data.login}")
+        return result
+    except HTTPException as e:
+        logger.warning(f"User creation failed for {user_data.login}: {e.detail}")
+        raise
+    except Exception as e:
+        logger.error(f"Server error during user creation for {user_data.login}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Ошибка сервера при создании пользователя"

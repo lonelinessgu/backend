@@ -1,4 +1,4 @@
-# middleware/cors.py
+# middleware/cors
 from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 

@@ -1,4 +1,4 @@
-#auth\user_check.py
+# auth/user_check
 import bcrypt
 from typing import Optional
 from backend.models.users import User
@@ -16,4 +16,4 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-    return hashed.decode('utf-8')  # Возвращаем как строку
+    return hashed.decode('utf-8')

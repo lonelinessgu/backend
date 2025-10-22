@@ -1,4 +1,4 @@
-# models/users_roles.py
+# models/users_roles
 from enum import Enum
 from functools import cache
 from pydantic_settings import BaseSettings

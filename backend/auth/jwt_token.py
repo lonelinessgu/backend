@@ -1,4 +1,4 @@
-#auth\token.py
+# auth/jwt_token
 from datetime import datetime, timedelta, timezone
 import os
 from jose import jwt, JWTError
@@ -13,16 +13,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 class TokenData(BaseModel):
     username: str | None = None
     role: str | None = None
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    """
-    Создаёт JWT-токен, включающий переданные данные и срок действия.
-    """
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
 
 def decode_token(token: str) -> TokenData:
     """
