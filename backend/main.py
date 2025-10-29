@@ -1,4 +1,4 @@
-# backend/main
+# backend.main
 from dotenv import load_dotenv
 load_dotenv() #Инициализация работы с .env файлом
 import logging

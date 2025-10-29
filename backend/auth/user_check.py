@@ -1,4 +1,4 @@
-# auth/user_check
+# backend.auth.user_check
 import bcrypt
 from typing import Optional
 from backend.models.users import User

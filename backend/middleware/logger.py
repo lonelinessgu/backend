@@ -1,4 +1,4 @@
-# middleware/logger
+# backend.middleware.logger
 import logging
 import time
 import os

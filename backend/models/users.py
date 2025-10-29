@@ -1,4 +1,4 @@
-# models/users
+# backend.models.users
 from tortoise import fields
 from tortoise.models import Model
 from enum import IntEnum
@@ -12,7 +12,7 @@ class UserStatus(IntEnum):
     PENDING = 2    # Ожидает активации
 
 class User(Model):
-    id = fields.IntField(pk=True)
+    id = fields.IntField(primary_key=True)
     login = fields.CharField(50, unique=True)
     hashed_password = fields.CharField(128)
     role = fields.CharEnumField(UserRole, default=UserRole.user)

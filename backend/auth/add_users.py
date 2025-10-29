@@ -1,4 +1,4 @@
-# auth/add_users
+# backend.auth.add_users
 from fastapi import HTTPException, status
 from passlib.context import CryptContext
 from backend.models.users import User

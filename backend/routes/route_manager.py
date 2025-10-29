@@ -1,17 +1,23 @@
-# routes/route_manager
+# backend.routes.route_manager
 from fastapi import APIRouter
 from fastapi.routing import APIRoute
 
-from backend.routes.user_modules.login import login_router
-from backend.routes.user_modules.create_user import create_user_router
-from backend.routes.health import health_router
+route_groups = {
+    "user_modules": {"login", "create_user"},
+}
 
 api_router = APIRouter(prefix="/api")
 
-api_router.include_router(login_router, tags=["user_modules"])
-api_router.include_router(create_user_router, tags=["user_modules"])
+for tag, route_names in route_groups.items():
+    for route_name in route_names:
+        module_path = f"backend.routes.{tag}.{route_name}"
+        module = __import__(module_path, fromlist=[f"{route_name}_router"])
+        router = getattr(module, f"{route_name}_router")
+        api_router.include_router(router, tags=[tag])
 
+from backend.routes.health import health_router
 api_router.include_router(health_router, tags=["health"])
+
 #Улучшение читаемости документации путём хуманизации тегов и упразднения повторов
 def add_route_tags(router: APIRouter):
     for route in router.routes:

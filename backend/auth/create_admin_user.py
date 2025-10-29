@@ -1,4 +1,4 @@
-# auth/create_admin_user
+# backend.auth.create_admin_user
 import asyncio
 from dotenv import load_dotenv
 from passlib.context import CryptContext

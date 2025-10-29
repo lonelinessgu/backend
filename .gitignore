@@ -3,7 +3,6 @@
 /data/*.db-wal
 .env
 /logs
-/test
 
 *.log
 npm-debug.log*

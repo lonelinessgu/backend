@@ -1,4 +1,4 @@
-# routes/user_modules/create_user
+# backend.routes.user_modules.create_user
 from fastapi import APIRouter, HTTPException, status
 from pydantic import field_validator
 from tortoise.contrib.pydantic import pydantic_model_creator
@@ -14,17 +14,16 @@ logger = logging.getLogger(__name__)
 BaseCreateUserRequest = pydantic_model_creator(
     User,
     name="BaseCreateUserRequest",
-    exclude=("id", "status", "hashed_password")
+    include=("login", "role")
 )
 
 class CreateUserRequest(BaseCreateUserRequest):
     password: str
 
     @field_validator('role')
-    def validate_role(cls, v: str) -> str:
+    def validate_role(cls, v: str) -> UserRole:
         try:
-            role_enum = UserRole(v)
-            return role_enum.value
+            return UserRole(v)
         except ValueError:
             raise PydanticCustomError("value_error", "Недопустимая роль")
 
