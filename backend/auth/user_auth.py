@@ -5,7 +5,7 @@ from jose import jwt, JWTError
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
-from backend.models.users import User
+from backend.models.users import User as Model
 from backend.auth.user_check import get_user_by_login
 
 # Конфигурация токена
@@ -51,7 +51,7 @@ async def get_token_data(token: str = Depends(oauth2_scheme)) -> TokenData:
         raise credentials_exception
 
 
-async def get_current_user(token_data: TokenData = Depends(get_token_data)) -> User:
+async def get_current_user(token_data: TokenData = Depends(get_token_data)) -> Model:
     user = await get_user_by_login(token_data.username)
     if not user:
         raise HTTPException(
@@ -62,7 +62,7 @@ async def get_current_user(token_data: TokenData = Depends(get_token_data)) -> U
     return user
 
 
-async def authenticate_user(login: str, password: str) -> User:
+async def authenticate_user(login: str, password: str) -> Model:
     user = await get_user_by_login(login)
     if not user:
         raise HTTPException(

@@ -1,10 +1,10 @@
 # backend.auth.user_check
 import bcrypt
 from typing import Optional
-from backend.models.users import User
+from backend.models.users import User as Model
 
-async def get_user_by_login(login: str) -> Optional[User]:
-    return await User.filter(login=login).first()
+async def get_user_by_login(login: str) -> Optional[Model]:
+    return await Model.filter(login=login).first()
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:

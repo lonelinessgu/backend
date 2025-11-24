@@ -1,6 +1,12 @@
 # backend.main
 from dotenv import load_dotenv
-load_dotenv() #Инициализация работы с .env файлом
+from pathlib import Path
+dotenv_path = Path(__file__).parents[1] / ".env"
+
+if not dotenv_path.exists():
+    raise FileNotFoundError(f".env файл не найден по пути: {dotenv_path}")
+
+load_dotenv(dotenv_path)
 import logging
 logging.basicConfig(level=logging.INFO)
 import uvicorn

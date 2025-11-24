@@ -1,21 +1,21 @@
 # backend.auth.add_users
 from fastapi import HTTPException, status
 from passlib.context import CryptContext
-from backend.models.users import User
+from backend.models.users import User as Model
 from typing import Dict
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 async def create_user(user_data: Dict) -> bool:
     """Создание нового пользователя с валидацией данных."""
-    if await User.filter(login=user_data["login"]).exists():
+    if await Model.filter(login=user_data["login"]).exists():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="User with this login already exists"
         )
 
     hashed_password = pwd_context.hash(user_data["password"][:72])
-    await User.create(
+    await Model.create(
         login=user_data["login"],
         role=user_data["role"],
         hashed_password=hashed_password
