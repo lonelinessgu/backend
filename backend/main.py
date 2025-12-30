@@ -25,7 +25,7 @@ from backend.middleware.cors import make_cors_middleware
 from backend.routes.route_manager import api_router
 from backend.middleware.validation_error_catcher import validation_exception_handler
 
-app = FastAPI(lifespan=lifespan, middleware=make_cors_middleware())
+app = FastAPI(lifespan=lifespan, middleware=make_cors_middleware(),docs_url=None, redoc_url=None)
 
 # Подключение логгеров
 app.exception_handler(RequestValidationError)(validation_exception_handler)

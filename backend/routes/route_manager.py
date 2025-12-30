@@ -3,7 +3,9 @@ from fastapi import APIRouter
 from fastapi.routing import APIRoute
 
 route_groups = {
+    "documentation": {"info"},
     "user_modules": {"login", "create_user"},
+    "test":{"rate_test"},
 }
 
 api_router = APIRouter(prefix="/api")

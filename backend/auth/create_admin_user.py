@@ -1,15 +1,17 @@
 import asyncio
 import logging
-from passlib.context import CryptContext
+import os
+
+# Загрузка .env файла
+from dotenv import load_dotenv
+load_dotenv()
+
 from backend.models.users import User as Model
 from backend.models.users_roles import UserRole as RolesModel
 from backend.lifespan import init_db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Инициализируем контекст для хеширования паролей
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Данные нового администратора
 ADMIN_LOGIN = "admin"
@@ -27,9 +29,6 @@ async def create_admin():
             logger.warning(f"Пользователь с логином '{ADMIN_LOGIN}' уже существует.")
             return
 
-        logger.debug("Хеширование пароля")
-        hashed_password = pwd_context.hash(ADMIN_PASSWORD)
-
         logger.info(f"Доступные роли: {[role.value for role in RolesModel]}")
         logger.info(f"Проверка роли '{ADMIN_ROLE}'")
 
@@ -43,7 +42,6 @@ async def create_admin():
         logger.debug(f"Создание пользователя '{ADMIN_LOGIN}' с ролью '{role_enum.value}'")
         await Model.create(
             login=ADMIN_LOGIN,
-            hashed_password=hashed_password,
             role=role_enum.value
         )
         logger.info(f"Администратор '{ADMIN_LOGIN}' успешно создан.")
